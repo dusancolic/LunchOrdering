@@ -18,13 +18,10 @@ public class AdminServlet extends HttpServlet {
         private Map<String, List<String>>ordersForUser;
         public AdminServlet() {
 
-
-
         }
 
         public void init() {
-           orders = HomeServlet.orders;
-           ordersForUser  = HomeServlet.ordersForUser;;
+
         }
 
         public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -34,6 +31,8 @@ public class AdminServlet extends HttpServlet {
 
             if(password!=null && password.equals(HomeServlet.password))
             {
+                orders = HomeServlet.orders;
+                ordersForUser  = HomeServlet.ordersForUser;
                 out.println("<html> <body> <h1>Choose your lunch</h1> <form method=\"POST\" " +
                         "action=\"/picked-dishes\">"
                 );
@@ -64,9 +63,11 @@ public class AdminServlet extends HttpServlet {
         protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
             if(password!=null && password.equals(HomeServlet.password))
             {
-                for(Map<String, Integer> dailyOrders : orders.values())
-                    dailyOrders.replaceAll((k,v) -> 0);
-                ordersForUser.clear();
+                synchronized (this) {
+                    for (Map<String, Integer> dailyOrders : orders.values())
+                        dailyOrders.replaceAll((k, v) -> 0);
+                    ordersForUser.clear();
+                }
             }
             response.sendRedirect("/picked-dishes?password=" + password);
         }
